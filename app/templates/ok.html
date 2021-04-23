@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+
+        <script type="text/javascript" src = "{{ url_for('statics', path='/task.js') }}"> </script>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script type="text/javascript" src = "{{ url_for('statics', path='/ok.js') }}"> </script>
+    </body>
+</html>

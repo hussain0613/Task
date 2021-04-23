@@ -5,6 +5,7 @@ import time
 class Task:
     __modelname__: str = 'Task'
     __id__:typing.ClassVar[int] = 0
+    tasks: typing.ClassVar[typing.Dict[int, Task]] = {}
 
     # id: int
     # supertask: Task = None
@@ -14,12 +15,15 @@ class Task:
     # title: str = None
     # details: str = None
     # tags: typing.List[str] = []## example study, entertainment, physic, coding etc
-    # total_duration: int = 0 ## or float or timedelta
+    # duration: int = 0 ## or float or timedelta
     # state: int  = 0## possible values = uninitialized, active, paused, ended (0, 1, 2 3)
 
-    def __init__(self, title:typing.Optional[str] = None, supertask: typing.optional[Task] = None):
-        Task.__id__ += 1
-        self.id = Task.__id__
+    def __init__(self, title:typing.Optional[str] = None, supertask: typing.optional[Task] = None, from_dict:bool = False):
+        if not from_dict:
+            Task.__id__ += 1
+            self.id = Task.__id__
+            Task.tasks[self.id] = self
+        
         if not title:
             self.title = f"Task-{self.id}"
 
@@ -30,42 +34,42 @@ class Task:
                                           ## numbered time means resueme time (indexing from 0), however if state == 3 last one means end time
         self.details: str = None
         self.tags: typing.List[str] = []## example study, entertainment, physic, coding etc
-        self.total_duration: int = 0 ## or float or timedelta
+        self.duration: int = 0 ## or float or timedelta
         self.state: int  = 0## possible values = uninitialized, active, paused, ended (0, 1, 2 3)
 
     def start(self):
         if self.state == 0:
-            self.timestamps.append(time.time())
+            self.timestamps.append(time.time_ns())
             self.state = 1
         else:
-            raise Exception("Task already started before")
+            raise Exception(f"Task-{self.id} already started before")
 
     def pause(self):
         if self.state == 1:
-            self.timestamps.append(time.time())
+            self.timestamps.append(time.time_ns())
             self.state = 2
         else:
-            raise Exception("Task not active")
+            raise Exception(f"Task-{self.id} not active")
 
     def resume(self):
         if self.state == 2:
-            self.timestamps.append(time.time())
+            self.timestamps.append(time.time_ns())
             self.state = 1
         else:
-            raise Exception("Task is not paused")
+            raise Exception(f"Task-{self.id} is not paused")
 
 
     def end(self):
         if self.state == 3:
-            raise Exception("Task already ended")
+            raise Exception(f"Task-{self.id} already ended")
         
-        self.timestamps.append(time.time())
+        self.timestamps.append(time.time_ns())
         self.state = 3
 
     def calculate_duration(self):
         if self.state == 3 and len(self.timestamps) == 1:
-            self.total_duration = 0
-            return self.total_duration
+            self.duration = 0
+            return self.duration
 
         d = 0
         for i in range(1, len(self.timestamps), 2):
@@ -75,10 +79,11 @@ class Task:
             if len(self.timestamps)%2 == 0:
                 raise Excepion("Continuation Error") ## it must have ended or be puased
             else:
-                d += time.time() - self.timestamps[-1]
+                d += time.time_ns() - self.timestamps[-1]
 
-        self.total_duration = d
+        self.duration = d
         return d
+    
     def add_tag(self, tag: str):
         self.tags.append(tag)
     
@@ -94,3 +99,30 @@ class Task:
 
         """
         pass
+
+    def __repr__(self):
+        return f"Task<id={self.id}, title={self.title}, state={self.state}, duration={self.calculate_duration()}>"
+
+    def to_dict(self):
+        d = {
+            'id' : self.id,
+            'title' : self.title,
+            'timestamps': self.timestamps,
+            'details': self.details,
+            'tags': self.tags,
+            'state': self.state,
+            'duration': self.calculate_duration()
+        }
+        return d
+    
+
+    def from_dict(task_dict:dict):
+        task = Task(task_dict[title], from_dict=True)
+        task.id = task_dict['id']
+        task.timestamps = task_dict['timestamps']
+        task.details = task_dict['details']
+        task.tags = task_dict['tags']
+        task.state = task_dict['state']
+        task.duration = task_dict['duration']
+
+        return task
