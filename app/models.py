@@ -75,7 +75,7 @@ class Task:
             if len(self.timestamps)%2 == 0:
                 raise Excepion("Continuation Error") ## it must have ended or be puased
             else:
-                d += time.time() - self.timestamps[-1]
+                d += time.time_ns() - self.timestamps[-1]
 
         self.total_duration = d
         return d

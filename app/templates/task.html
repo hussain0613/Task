@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Task not React</title>
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  </head>
+  <body>
+    <div class="navbar">
+        <button onclick="add_task()">Add New</button>
+    </div>
+    <div class="tasks">
+        <h1>Tasks</h1>
+        <div class="list-group">
+            <a href="#"><h3>Active</h3></a>
+            <div class="list-group" id = "active">
+
+            </div>
+        </div>
+        
+        <div class="list-group">
+            <a href="#"><h3>Paused</h3></a>
+            <div class="list-group" id = "paused">
+
+            </div>
+        </div>
+        
+        <div class="list-group">
+            <a href="#"><h3>Completed</h3></a>
+            <div class="list-group" id = "ended">
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script type="text/javascript" src="{{ url_for('statics', path='task.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('statics', path='utils.js') }}"></script>
+  </body>
+</html>

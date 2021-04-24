@@ -1,34 +1,47 @@
-from fastapi import FastAPI, WebSocket, Request, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 
-app.mount("/statics", app=StaticFiles(directory="app/statics"), name="statics")
-templates = Jinja2Templates("app/templates")
+app.mount(path="/statics", app = StaticFiles(directory="app/statics"), name="statics")
+templates = Jinja2Templates(directory="app/templates")
+
+_id_ = 0
+sockets: dict[int, WebSocket] = {}
 
 
 @app.get("/")
-async def get(request:Request):
-    return templates.TemplateResponse("ok.html", context = {'request': request})
+async def index(request: Request):
+    return templates.TemplateResponse(name="task.html", context={"request": request})
 
 
-websockets = []
+
 @app.websocket("/ws")
-async def websocket_endpoint(uname, websocket: WebSocket):
+async def hanled_socket(websocket:WebSocket):
     await websocket.accept()
-    await websocket.send_text(f"[*] welcome {uname}")
-    websockets.append(websocket)
-    for ws in websockets:
-        if(ws != websocket): await ws.send_text(f"[*] {uname} has joined")
+    global _id_
+    _id_+=1
+    id = _id_
+    sockets[id] = websocket
+    
+    await websocket.send_json({"message": f"[*] connection established as {id}"})
+    
+    for i in sockets:
+        if sockets[i]!=websocket:
+            await sockets[i].send_json({"message": f"[*] {id} joined"})
     try:
         while True:
-            data = await websocket.receive_text()
-            await websocket.send_text(f"You: {data}")
-            for ws in websockets:
-                if(ws != websocket): await ws.send_text(f"{uname}: {data}")
+            data = await websocket.receive_json()
+            await websocket.send_json({"message": "yo", "data": data})
+            
+            for i in sockets:
+                if sockets[i]!=websocket:
+                    await sockets[i].send_json({"message": data, "from": id})
+    
     except WebSocketDisconnect as err:
-        websockets.remove(websocket)
-        for ws in websockets:
-            await ws.send_text(f"[*] {uname} disconnect")
+        sockets.pop(id)
+        for i in sockets:
+            if sockets[i]!=websocket:
+                await sockets[i].send_json({"message": f"[*] {id} disconnected"})
