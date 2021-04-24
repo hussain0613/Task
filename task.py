@@ -26,6 +26,8 @@ class Task:
         
         if not title:
             self.title = f"Task-{self.id}"
+        else:
+            self.title = title
 
 
         self.supertask: Task = None
