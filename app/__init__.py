@@ -39,7 +39,7 @@ async def hanled_socket(websocket:WebSocket):
             if(data.get('type') == "instruction"):
                 if data.get('instruction') == "create_new":
                     t = Task(title=data.get('title'))
-                    await websocket.send_json({"instruction":"change_id", "old_id":data['id'], 'new_id':t.id})
+                    await websocket.send_json({"type": "instruction", "instruction":"change_id", "old_id":data['id'], 'new_id':t.id})
                     data['id'] = t.id
                 elif data.get('instruction') == "state change":
                     

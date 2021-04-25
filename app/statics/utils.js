@@ -23,7 +23,7 @@ ws.onmessage = function (event){
             new_id = data["new_id"];
             Task.tasks[old_id].id = new_id;
             Task.tasks[new_id] = Task.tasks[old_id]; // if there's any conflict then will have to take of that too
-            delete Task.tasks[old_id];
+            if(old_id != new_id) delete Task.tasks[old_id];
         }
         else if(data["instruction"] == "state change"){
             id = data["id"];
