@@ -1,3 +1,5 @@
+from .models import Task
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -34,11 +36,28 @@ async def hanled_socket(websocket:WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
-            await websocket.send_json({"message": "yo", "data": data})
-            
+            if(data.get('type') == "instruction"):
+                if data.get('instruction') == "create_new":
+                    t = Task(title=data.get('title'))
+                    await websocket.send_json({"instruction":"change_id", "old_id":data['id'], 'new_id':t.id})
+                    data['id'] = t.id
+                elif data.get('instruction') == "state change":
+                    
+                    id = data["id"]
+                    new_state = data["new_state"]
+                    t = Task.tasks[id]; # mismatch can happen, then will have to handle that too..
+                    if (new_state == 1):
+                        if(t.state == 0):
+                            t.start(data['ts'])
+                        
+                        else: t.resume(data['ts'])
+                    elif(new_state == 2):
+                        t.pause(data['ts'])
+                    else: t.stop(data['ts'])
+
             for i in sockets:
                 if sockets[i]!=websocket:
-                    await sockets[i].send_json({"message": data, "from": id})
+                    await sockets[i].send_json(data)
     
     except WebSocketDisconnect as err:
         sockets.pop(id)

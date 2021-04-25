@@ -34,11 +34,16 @@ class Task{
         this.container.appendChild(this.card)
     }
 
-    start() {
+    start(ts = null) {
         if(this.state == 0){
-            this.timestamps.push(Date.now());
+            if(ts == null) {
+                ts = Date.now();
+                send_state_change(1, ts);
+            }
+            this.timestamps.push(ts)
             this.state = 1;
 
+            
             this.card.remove();
             this.container = document.getElementById("active")
             this.container.appendChild(this.card);
@@ -52,12 +57,16 @@ class Task{
             //console.log("weird thing, state = " + this.state)
         }
     }
-    pause(){
+    pause(ts = null){
         if(this.state == 1){
-            this.timestamps.push(Date.now());
+            if(ts == null) {
+                ts = Date.now();
+                send_state_change(2, ts);
+            }
+            this.timestamps.push(ts)
             this.state = 2;
 
-
+            
             this.card.remove();
             this.container = document.getElementById("paused")
             this.container.appendChild(this.card);
@@ -71,9 +80,13 @@ class Task{
             throw Error("Not running");
         }
     }
-    resume(){
+    resume(ts = null){
         if(this.state == 2){
-            this.timestamps.push(Date.now());
+            if(ts == null) {
+                ts = Date.now();
+                send_state_change(1, ts);
+            }
+            this.timestamps.push(ts)
             this.state = 1;
 
 
@@ -89,15 +102,19 @@ class Task{
             throw Error("Not paused");
         }
     }
-    stop(){
+    stop(ts=null){
         if(this.state == 3){
             throw Error("Already stopped");
         }
         else{
-            this.timestamps.push(Date.now());
+            if(ts == null) {
+                ts = Date.now();
+                send_state_change(3, ts);
+            }
+            this.timestamps.push(ts)
             this.state = 3;
 
-
+            
             this.card.remove();
             this.container = document.getElementById("ended")
             this.container.appendChild(this.card);

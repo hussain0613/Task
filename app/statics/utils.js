@@ -1,3 +1,6 @@
+SERVER_TIMESTAMP = 0.0;
+LOCAL_TIMESTAMP = 0.0;
+
 ws = new WebSocket( location.origin.replace(location.protocol, "ws:") + "/ws")
 document.onload = ()=>{
     ws.send(JSON.stringify({
@@ -7,10 +10,13 @@ document.onload = ()=>{
 }
 
 ws.onmessage = function (event){
+    SERVER_TIMESTAMP = Date.now();// server theke asha kono value hoile valos hoy
+    LOCAL_TIMESTAMP = Date.now(); // eita local hoilei valo may be
+
     data = JSON.parse(event.data);
     if (data["type"] == "instruction"){
         if(data["instruction"] == "create_new"){
-            
+            new Task(data["title"], data["id"])
         }
         else if(data["instruction"] == "change_id"){
             old_id = data["old_id"];
@@ -25,14 +31,14 @@ ws.onmessage = function (event){
             t = Task.tasks[id]; // mismatch can happen, then will have to handle that too..
             if (new_state == 1){
                 if(t.state == 0){
-                    t.start();
+                    t.start(data['ts']);
                 }
-                else t.resume();
+                else t.resume(data['ts']);
             }
-            else if(new_state = 2){
-                t.pause();
+            else if(new_state == 2){
+                t.pause(data['ts']);
             }
-            else t.stop();
+            else t.stop(data['ts']);
         }
     }
 }
@@ -51,6 +57,22 @@ function add_task(){
         "id": t.id
     }));
 }
+
+
+
+function send_state_change(new_state, ts) {
+    ws.send(JSON.stringify({
+        "type": "instruction",
+        "instruction":  "state change",
+        "id": t.id,
+        "new_state": new_state,
+        "ts": ts
+    }));
+}
+
+
+
+
 
 
 function sleep(ms) {

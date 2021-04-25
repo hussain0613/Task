@@ -5,6 +5,7 @@ import time
 class Task:
     __modelname__: str = 'Task'
     __id__:typing.ClassVar[int] = 0
+    tasks: typing.ClassVar[typing.Dict[int, Task]] = {}
 
     # id: int
     # supertask: Task = None
@@ -17,11 +18,20 @@ class Task:
     # total_duration: int = 0 ## or float or timedelta
     # state: int  = 0## possible values = uninitialized, active, paused, ended (0, 1, 2 3)
 
-    def __init__(self, title:typing.Optional[str] = None, supertask: typing.optional[Task] = None):
+    def __init__(self, id: typing.Optional[int] = None,title: typing.Optional[str] = None, supertask: typing.optional[Task] = None):
         Task.__id__ += 1
-        self.id = Task.__id__
+        
+        if not id:
+            self.id = Task.__id__
+        else:
+            self.id = id
+        
+        Task.tasks[self.id] = self
+
         if not title:
             self.title = f"Task-{self.id}"
+        else:
+            self.title = title
 
 
         self.supertask: Task = None
@@ -33,33 +43,45 @@ class Task:
         self.total_duration: int = 0 ## or float or timedelta
         self.state: int  = 0## possible values = uninitialized, active, paused, ended (0, 1, 2 3)
 
-    def start(self):
+    def start(self, ts = None):
         if self.state == 0:
-            self.timestamps.append(time.time_ns())
+            if ts:
+                self.timestamps.append(ts)
+            else:
+                self.timestamps.append(time.time_ns())
             self.state = 1
         else:
             raise Exception("Task already started before")
 
-    def pause(self):
+    def pause(self, ts = None):
         if self.state == 1:
-            self.timestamps.append(time.time_ns())
+            if ts:
+                self.timestamps.append(ts)
+            else:
+                self.timestamps.append(time.time_ns())
             self.state = 2
         else:
             raise Exception("Task not active")
 
-    def resume(self):
+    def resume(self, ts = None):
         if self.state == 2:
-            self.timestamps.append(time.time_ns())
+            if ts:
+                self.timestamps.append(ts)
+            else:
+                self.timestamps.append(time.time_ns())
             self.state = 1
         else:
             raise Exception("Task is not paused")
 
 
-    def end(self):
+    def stop(self, ts = None):
         if self.state == 3:
             raise Exception("Task already ended")
         
-        self.timestamps.append(time.time_ns())
+        if ts:
+            self.timestamps.append(ts)
+        else:
+            self.timestamps.append(time.time_ns())
         self.state = 3
 
     def calculate_duration(self):
