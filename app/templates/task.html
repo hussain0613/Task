@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8">
     <title>Task not React</title>
+
+    <link rel="stylesheet" href="{{ url_for('statics', path='task.css') }}">
+
     <!-- Load React. -->
     <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
@@ -10,27 +13,31 @@
   </head>
   <body>
     <div class="navbar">
-        <button onclick="add_task()">Add New</button>
+        <button onclick="add_new()">Add New</button>
+        <form action="" onsubmit="add_task(event)" style="display: none;" id = "create_new_form">
+          <label for="title">Title: </label><input type="text" name="title" id="title" placeholder="title">
+          <button>Create</button>
+        </form>
     </div>
     <div class="tasks">
         <h1>Tasks</h1>
         <div class="list-group">
-            <a href="#"><h3>Active</h3></a>
-            <div class="list-group" id = "active">
+            <h2 class="collapsible-controller">Active</h2>
+            <div class="list-group collapsible-content" id = "active">
 
             </div>
         </div>
         
         <div class="list-group">
-            <a href="#"><h3>Paused</h3></a>
-            <div class="list-group" id = "paused">
+            <h2 class="collapsible-controller">Paused</h2>
+            <div class="list-group collapsible-content" id = "paused">
 
             </div>
         </div>
         
         <div class="list-group">
-            <a href="#"><h3>Completed</h3></a>
-            <div class="list-group" id = "ended">
+            <h2 class="collapsible-controller">Completed</h2>
+            <div class="list-group collapsible-content" id = "ended">
 
             </div>
         </div>

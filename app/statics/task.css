@@ -1,0 +1,14 @@
+.collapsible-content {
+    display: none;
+    overflow: hidden;
+}
+
+.collapsible-controller{
+    border-bottom: double;
+}
+.collapsible-controller:hover {
+    cursor: pointer;
+}
+.active{
+    border-bottom: dotted;
+}  

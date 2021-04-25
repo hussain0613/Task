@@ -53,8 +53,20 @@ ws.onclose = function(event){
     console.log("[*] server dead")
 }
 
-function add_task(){
-    t = new Task();
+
+function add_new() {
+    form = document.getElementById("create_new_form")
+    form.style.display = "block";
+}
+
+
+function add_task(event){
+    form.style.display = "none";
+    title = document.getElementById("title")
+
+    if(title.value == null || title.value == "") t = new Task();
+    else t = new Task(title=title.value);
+    title.value = "";
     
     ws.send(JSON.stringify({
         "type": "instruction",
@@ -62,6 +74,7 @@ function add_task(){
         "title": t.title,
         "id": t.id
     }));
+    event.preventDefault()
 }
 
 
@@ -111,3 +124,20 @@ async function main(){
 }
 
 main();
+
+
+
+var coll = document.getElementsByClassName("collapsible-controller");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+} 
