@@ -29,6 +29,7 @@ async def hanled_socket(websocket:WebSocket):
     sockets[id] = websocket
     
     await websocket.send_json({"message": f"[*] connection established as {id}"})
+    await websocket.send_json({"type": 'info', "current_id":Task.__id__})
     
     for i in sockets:
         if sockets[i]!=websocket:
@@ -36,10 +37,13 @@ async def hanled_socket(websocket:WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
-            if(data.get('type') == "instruction"):
+            if data.get('type') == 'info':
+                if data.get('current_id') != Task.__id__: await websocket.send_json({"type": 'info', "current_id":Task.__id__})
+            elif(data.get('type') == "instruction"):
                 if data.get('instruction') == "create_new":
                     t = Task(title=data.get('title'))
-                    await websocket.send_json({"type": "instruction", "instruction":"change_id", "old_id":data['id'], 'new_id':t.id})
+                    if data['id'] != t.id:
+                        await websocket.send_json({"type": "instruction", "instruction":"change_id", "old_id":data['id'], 'new_id':t.id})
                     data['id'] = t.id
                 elif data.get('instruction') == "state change":
                     

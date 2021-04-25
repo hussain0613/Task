@@ -14,16 +14,22 @@ ws.onmessage = function (event){
     LOCAL_TIMESTAMP = Date.now(); // eita local hoilei valo may be
 
     data = JSON.parse(event.data);
-    if (data["type"] == "instruction"){
+    if (data["type"] == "info"){
+        Task.__id__ = data["current_id"];
+    }
+    else if (data["type"] == "instruction"){
         if(data["instruction"] == "create_new"){
             new Task(data["title"], data["id"])
         }
         else if(data["instruction"] == "change_id"){
             old_id = data["old_id"];
             new_id = data["new_id"];
-            Task.tasks[old_id].id = new_id;
-            Task.tasks[new_id] = Task.tasks[old_id]; // if there's any conflict then will have to take of that too
-            if(old_id != new_id) delete Task.tasks[old_id];
+            if(old_id != new_id){
+                Task.tasks[old_id].id = new_id;
+                Task.tasks[new_id] = Task.tasks[old_id]; // if there's any conflict then will have to take of that too
+                delete Task.tasks[old_id];
+                if(Task.__id__ == old_id) Task.__id__ = new_id;
+            }
         }
         else if(data["instruction"] == "state change"){
             id = data["id"];
